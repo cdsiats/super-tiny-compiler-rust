@@ -1,3 +1,9 @@
+use lexer::Lexer;
+
+mod lexer;
+mod tokens;
+
 fn main() {
-    println!("Hello, world!");
+    let mut lexer = Lexer::new("(add 2 4)".to_string());
+    lexer.tokenize();
 }
