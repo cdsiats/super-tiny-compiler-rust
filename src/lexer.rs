@@ -14,6 +14,10 @@ impl Lexer {
             current: 0
         }
     }
+    
+    fn advance(&mut self) {
+        self.current += 1;
+    }
 
     pub fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = vec![];
@@ -27,7 +31,7 @@ impl Lexer {
                         kind: "paren".to_string(), 
                         value: char.to_string(),
                     });
-                    self.current += 1;
+                    self.advance();
                     continue;
                 },
                 _ => todo!("Handle catch all.")
