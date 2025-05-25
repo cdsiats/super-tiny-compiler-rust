@@ -29,15 +29,54 @@ impl Lexer {
                 '(' => {
                     tokens.push(Token { 
                         kind: "paren".to_string(), 
-                        value: char.to_string(),
+                        value: "(".to_string(),
                     });
                     self.advance();
                     continue;
                 },
+                ')' => {
+                    tokens.push(Token { 
+                        kind: "paren".to_string(), 
+                        value: ")".to_string(), 
+                    });
+                    self.advance();
+                    continue;
+                },
+                char if char.is_whitespace() => {
+                    self.advance();
+                    continue;
+                }
                 _ => todo!("Handle catch all.")
             }
         }
 
         tokens
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::tokens;
+
+    use super::*;
+
+    #[test]
+    fn test_whitespace() {
+        let mut lexer = Lexer::new("\n\t".to_string());
+        let tokens = lexer.tokenize();
+
+        assert!(tokens.is_empty(),);
+    }
+
+    #[test]
+    fn test_parens() {
+        let mut lexer = Lexer::new("()".to_string());
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens.len(), 2);
+        assert_eq!(tokens[0].kind, "paren");
+        assert_eq!(tokens[0].value, "(");
+        assert_eq!(tokens[1].kind, "paren");
+        assert_eq!(tokens[1].value, ")");
     }
 }
