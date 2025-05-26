@@ -19,6 +19,11 @@ impl Lexer {
         self.current += 1;
     }
 
+    fn peek(&mut self) -> Option<char> {
+        let char = self.source.chars().nth(self.current + 1);
+        char
+    }
+
     pub fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = vec![];
         
@@ -45,7 +50,51 @@ impl Lexer {
                 char if char.is_whitespace() => {
                     self.advance();
                     continue;
-                }
+                },
+                c if c.is_numeric() => {
+                    let mut value = String::from("");
+                    //push the first value
+                    value.push(c.clone());
+                    //while the next number is still numeric
+                    //push the value
+                    while let Some(char) = self.peek() {
+                        if char.is_numeric() {
+                            value.push(char);
+                            self.advance();
+                        }
+                        break;
+                    }
+
+                    tokens.push(Token { 
+                        kind: "number".to_string(), 
+                        value: value, 
+                    });
+                    self.advance();
+                    continue;
+                },
+                '"' => {
+                    let mut value = String::from("");
+                    //skip the first "
+                    self.advance();
+
+                    while let Some(char) = self.peek() {
+                        if char != '"' {
+                            value.push(char);
+                            self.advance();
+                        }
+                        break;
+                    }
+
+                    //skip closing quote
+                    self.advance();
+
+                    tokens.push(Token { 
+                        kind: "string".to_string(), 
+                        value: value 
+                    });
+
+                    continue;
+                },
                 _ => todo!("Handle catch all.")
             }
         }
@@ -78,5 +127,17 @@ mod tests {
         assert_eq!(tokens[0].value, "(");
         assert_eq!(tokens[1].kind, "paren");
         assert_eq!(tokens[1].value, ")");
+    }
+
+    #[test]
+    fn test_numbers() {
+        let mut lexer = Lexer::new("1 2".to_string());
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens.len(), 2);
+        assert_eq!(tokens[0].kind, "number");
+        assert_eq!(tokens[0].value, "1".to_string());
+        assert_eq!(tokens[1].kind, "number");
+        assert_eq!(tokens[1].value, "2".to_string());
     }
 }
