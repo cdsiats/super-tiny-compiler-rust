@@ -180,4 +180,11 @@ mod tests {
         assert_eq!(tokens[0].kind, "string");
         assert_eq!(tokens[0].value, "hello".to_string());
     }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_char() {
+        let mut lexer = Lexer::new("@".to_string());
+        lexer.tokenize();
+    }
 }
