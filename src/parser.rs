@@ -1,7 +1,7 @@
 
 use crate::tokens::Token;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 enum Node {
     Program {
         body: Vec<Node>,
@@ -129,6 +129,6 @@ mod tests {
             ]
         };
 
-        assert_eq!(format!("{:?}", ast), format!("{:?}", expected));
+        assert_eq!(ast, expected);
     }
 }
