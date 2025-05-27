@@ -3,14 +3,14 @@ use std::char;
 use crate::tokens::Token;
 
 pub struct Lexer {
-    pub source: String,
+    pub source: Vec<char>,
     pub current: usize
 }
 
 impl Lexer {
     pub fn new(input: String) -> Self {
         Lexer {
-            source: input,
+            source: input.chars().collect(),
             current: 0
         }
     }
@@ -20,14 +20,14 @@ impl Lexer {
     }
 
     fn peek(&mut self) -> Option<char> {
-        self.source.chars().nth(self.current + 1)
+        self.source.get(self.current).cloned()
     }
 
     pub fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = vec![];
         
         while self.current < self.source.len() {
-            let char = &self.source.chars().nth(self.current).unwrap();
+            let char = self.source[self.current];
 
             match char {
                 '(' => {
@@ -57,7 +57,7 @@ impl Lexer {
                     self.advance();
                     //while the next number is still numeric
                     //push the value
-                    while let Some(char) = self.source.chars().nth(self.current) {
+                    while let Some(char) = self.peek() {
                         if char.is_numeric() {
                             value.push(char);
                             self.advance();
@@ -68,7 +68,7 @@ impl Lexer {
                         kind: "number".to_string(), 
                         value: value,
                     });
-                    self.advance();
+
                     continue;
                 },
                 '"' => {
@@ -76,7 +76,7 @@ impl Lexer {
                     //skip opening quote
                     self.advance();
 
-                    while let Some(next_char) = self.source.chars().nth(self.current) {
+                    while let Some(next_char) = self.peek() {
                         if next_char == '"' {
                             self.advance();
                             break;
@@ -85,9 +85,6 @@ impl Lexer {
                             self.advance();
                         }
                     }
-
-                    //skip closing quote
-                    self.advance();
 
                     tokens.push(Token { 
                         kind: "string".to_string(), 
@@ -102,7 +99,7 @@ impl Lexer {
                     value.push(c.clone());
                     self.advance();
 
-                    while let Some(next_char) = self.source.chars().nth(self.current) {
+                    while let Some(next_char) = self.peek() {
                         if next_char.is_alphabetic() {
                             value.push(next_char);
                             self.advance();
@@ -182,9 +179,28 @@ mod tests {
     }
 
     #[test]
+    fn test_multiple_tokens() {
+        let mut lexer = Lexer::new("(add 1 2)".to_string());
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens.len(), 5);
+        assert_eq!(tokens[0].kind, "paren");
+        assert_eq!(tokens[0].value, "(".to_string());
+        assert_eq!(tokens[1].kind, "name");
+        assert_eq!(tokens[1].value, "add".to_string());
+        assert_eq!(tokens[2].kind, "number");
+        assert_eq!(tokens[2].value, "1".to_string());
+        assert_eq!(tokens[3].kind, "number");
+        assert_eq!(tokens[3].value, "2".to_string());
+        assert_eq!(tokens[4].kind, "paren");
+        assert_eq!(tokens[4].value, ")".to_string());
+    }
+
+    #[test]
     #[should_panic]
     fn test_invalid_char() {
         let mut lexer = Lexer::new("@".to_string());
         lexer.tokenize();
+        
     }
 }
