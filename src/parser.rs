@@ -109,7 +109,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse_numbers() {
+    fn test_parse_numbers() {
         let mut lexer = Lexer::new("1 2".to_string());
         let tokens = lexer.tokenize();
 
